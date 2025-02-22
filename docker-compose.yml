@@ -1,0 +1,27 @@
+version: "3.8"
+services:
+  vllm:
+    image: vllm/vllm-openai:latest
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    ports:
+      - "8000:8000"
+    volumes:
+      - /path/to/models:/app/model
+    command: ["--model", "/app/model/Mistral-7B-v0.1"] #adjust model name
+  gradio:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7860:7860"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock #allow gradio to interact with docker.
+    depends_on:
+      - vllm
